@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="style/index.css">
+</head>
+<body>
+    <div class="play-block">
+        <video class="video" name="media" controls>
+            <source src="video/%5BSumiSora%5D%5BLittleBusters%5D%5BSP%5D%5BGB%5D%5B720p%5D.mp4" type="video/mp4">
+        </video>
+        <div class="play-info">
+            <div class="progress-bar"><span class="progress"></span></div>
+            <div class="command-block">
+                <button class="command play playpause"></button>
+                <div class="volume-block">
+                    <button class="command on volume"></button>
+                    <input class="volume-range" min="0" max="1" step="0.05" type="range">
+                </div>
+                <div class="time">0:00/0:00</div>
+                <button class="command full"></button>
+            </div>
+            <div class="danmaku-sender">
+                <input class="danmaku-content" type="text">
+                <button class="send">send</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="small-video-container">
+        <div class="drag-bar">move</div>
+        <div class="close">close</div>
+        <div class="resize-bar">resize</div>
+        <video class="small-video">
+            <source src="video/%5BSumiSora%5D%5BLittleBusters%5D%5BSP%5D%5BGB%5D%5B720p%5D.mp4" type="video/mp4">
+        </video>
+    </div>
+    <script src="script/index.js"></script>
+</body>
+</html>

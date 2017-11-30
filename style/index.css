@@ -1,0 +1,178 @@
+* {
+    box-sizing: border-box;
+}
+@media screen and (min-width: 1000px) {
+    .play-block {
+        width: 960px;
+    }
+    .video {
+        height: 540px;
+    }
+}
+@media screen and (min-width: 600px) and (max-width: 1000px) {
+    .play-block {
+        width: 576px;
+    }
+    .video {
+        height: 324px;
+    }
+}
+.play-block {
+    overflow: hidden;
+    color: rgb(44, 141, 232);
+    margin: 20px;
+}
+
+.video {
+    width: 100%;
+}
+video::-webkit-media-controls {
+    display: none !important;
+}
+video::-webkit-media-controls-enclosure {
+    display: none !important;
+}
+
+.play-info {
+    overflow: hidden;
+    border: rgb(222, 222, 222) 1px solid;
+    padding: 5px;
+    z-index: 2147483647;
+    background-color: white;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    position: relative;
+}
+
+.progress-bar {
+    height: 2px;
+    width: 99%;
+    background: rgb(222, 222, 222);
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+}
+.progress {
+    display: block;
+    height: 3px;
+    width: 0;
+    background: rgb(44, 141, 232);
+}
+
+.command-block {
+    display: block;
+    margin-top: 5px;
+    vertical-align: middle;
+    overflow: hidden;
+}
+.command {
+    background: none;
+    border: none;
+    color: rgb(44, 141, 232);
+    font-family: "Segoe MDL2 Assets";
+    font-size: 1.5em;
+    padding: 0;
+    cursor: pointer;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+.play:before {
+    content: "";
+}
+.pause:before {
+    content: "";
+}
+.on:before {
+    content: "";
+}
+.off:before {
+    content: "";
+}
+.full:before {
+    content: "";
+}
+.exit-full:before {
+    content: "";
+}
+.playpause {
+    float: left;
+}
+.full, .exit-full {
+    float: right;
+}
+.volume-block {
+    display: inline-flex;
+    float: left;
+}
+.volume-range {
+    -webkit-appearance: none;
+    outline: none;
+    height: 2px;
+    width: 50px;
+    background: rgb(44, 141, 232);
+    cursor: pointer;
+    display: none;
+    margin-top: 10px;
+}
+.volume-range::-webkit-slider-thumb {
+    height: 2px;
+    width: 2px;
+    background: white;
+    -webkit-appearance: none;
+}
+.volume-block:hover .volume-range {
+    display: inline-block;
+}
+.time {
+    display: inline;
+    margin-left: 5px;
+    float: left;
+}
+.danmaku-sender {
+    height: 30px;
+    margin: 5px;
+    border-top: 1px solid rgb(222, 222, 222);
+}
+.danmaku-content {
+    width: 80%;
+    height: 25px;
+    border-radius: 5px;
+    border: 1px solid rgb(222, 222, 222);
+    margin-top: 5px;
+}
+.send {
+    background: rgb(44, 141, 232);
+    height: 25px;
+    border-radius: 5px;
+    border: 1px solid rgb(222, 222, 222);
+    color: white;
+    cursor: pointer;
+}
+
+.small-video-container {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    display: none;
+    width: 320px;
+}
+.small-video {
+    height: 180px;
+    width: 100%;
+    clear: both;
+    display: block;
+}
+.drag-bar {
+    float: left;
+    height: 20px;
+    cursor: move;
+}
+.resize-bar {
+    float: right;
+    cursor: nesw-resize;
+}
+.close {
+    float: right;
+    cursor: pointer;
+}
