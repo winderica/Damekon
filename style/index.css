@@ -95,10 +95,16 @@ video::-webkit-media-controls-enclosure {
 .exit-full:before {
     content: "";
 }
+.danmaku:before {
+    content: "";
+}
 .playpause {
     float: left;
 }
 .full, .exit-full {
+    float: right;
+}
+.danmaku {
     float: right;
 }
 .volume-block {
