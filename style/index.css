@@ -20,7 +20,7 @@
 .play-block {
     overflow: hidden;
     color: rgb(44, 141, 232);
-    margin: 20px;
+    margin-bottom: 20px;
 }
 
 .video {
@@ -37,7 +37,6 @@ video::-webkit-media-controls-enclosure {
     overflow: hidden;
     border: rgb(222, 222, 222) 1px solid;
     padding: 5px;
-    z-index: 2147483647;
     background-color: white;
     width: 100%;
     bottom: 0;
@@ -76,6 +75,7 @@ video::-webkit-media-controls-enclosure {
     cursor: pointer;
     margin-left: 5px;
     margin-right: 5px;
+    vertical-align: middle;
 }
 .play:before {
     content: "";
@@ -98,13 +98,19 @@ video::-webkit-media-controls-enclosure {
 .danmaku:before {
     content: "";
 }
+.float:before {
+    content: "";
+}
+.danmaku-sender:before {
+    content: '';
+}
+.danmaku-settings:before {
+    content: '';
+}
 .playpause {
     float: left;
 }
-.full, .exit-full {
-    float: right;
-}
-.danmaku {
+.full, .exit-full, .danmaku, .float {
     float: right;
 }
 .volume-block {
@@ -135,26 +141,6 @@ video::-webkit-media-controls-enclosure {
     margin-left: 5px;
     float: left;
 }
-.danmaku-sender {
-    height: 30px;
-    margin: 5px;
-    border-top: 1px solid rgb(222, 222, 222);
-}
-.danmaku-content {
-    width: 80%;
-    height: 25px;
-    border-radius: 5px;
-    border: 1px solid rgb(222, 222, 222);
-    margin-top: 5px;
-}
-.send {
-    background: rgb(44, 141, 232);
-    height: 25px;
-    border-radius: 5px;
-    border: 1px solid rgb(222, 222, 222);
-    color: white;
-    cursor: pointer;
-}
 
 .small-video-container {
     position: fixed;
@@ -162,6 +148,13 @@ video::-webkit-media-controls-enclosure {
     bottom: 20px;
     display: none;
     width: 320px;
+    overflow: hidden;
+    z-index: 1;
+}
+.small-video-container button {
+    background: none;
+    border: none;
+    color: rgb(44, 141, 232);
 }
 .small-video {
     height: 180px;
@@ -171,14 +164,50 @@ video::-webkit-media-controls-enclosure {
 }
 .drag-bar {
     float: left;
-    height: 20px;
     cursor: move;
+    margin-right: 20px;
 }
 .resize-bar {
-    float: right;
-    cursor: nesw-resize;
+    float: left;
+    cursor: ew-resize;
 }
 .close {
     float: right;
     cursor: pointer;
+}
+.danmaku-block {
+    display: flex;
+}
+.danmaku-command {
+    margin: 5px auto;
+    width: 90%;
+}
+.danmaku-style {
+    display: none;
+}
+.danmaku-input {
+    border-radius: 5px;
+    height: 30px;
+    width: 90%;
+    border: 1px solid rgb(44, 141, 232);
+}
+.danmaku-item {
+    animation-name: flow;
+    animation-duration: 10s;
+    animation-fill-mode: forwards;
+    color: white;
+    font-size: 2em;
+}
+@keyframes flow {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-2000px);
+    }
+}
+
+
+.test {
+    overflow: hidden;
 }
