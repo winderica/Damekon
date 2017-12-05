@@ -1,11 +1,12 @@
 * {
     box-sizing: border-box;
 }
+
 @media screen and (min-width: 1000px) {
     .play-block {
         width: 960px;
     }
-    .video {
+    .video-block {
         height: 540px;
     }
 }
@@ -13,7 +14,7 @@
     .play-block {
         width: 576px;
     }
-    .video {
+    .video-block {
         height: 324px;
     }
 }
@@ -21,8 +22,11 @@
     overflow: hidden;
     color: rgb(44, 141, 232);
     margin-bottom: 20px;
+    position: relative;
 }
-
+.video-block {
+    position: relative;
+}
 .video {
     width: 100%;
 }
@@ -176,28 +180,51 @@ video::-webkit-media-controls-enclosure {
     cursor: pointer;
 }
 .danmaku-block {
-    display: flex;
+    position: absolute;
+    height: 100%;
+    width: 100%;
 }
 .danmaku-command {
-    margin: 5px auto;
-    width: 90%;
+    width: 50%;
+    position: absolute;
+    bottom: 50px;
+    right: 25%;
+    z-index: 2147483647;
+    display: none;
 }
 .danmaku-style {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.7);
+    bottom: 35px;
+    right: -75px;
+    height: 200px;
+    width: 300px;
+    border-radius: 5px;
+    text-align: center;
+    z-index: 2147483647;
     display: none;
+}
+input[type='radio'] {
+    height: 12px;
+    width: 12px;
+    border: 1px solid rgb(44, 141, 232);
+    border-radius: 6px;
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+input[type='radio']:checked {
+    background: rgb(44, 141, 232);
 }
 .danmaku-input {
     border-radius: 5px;
     height: 30px;
-    width: 90%;
+    width: 85%;
     border: 1px solid rgb(44, 141, 232);
+    background-color: rgba(255, 255, 255, 0.4);
 }
-.danmaku-item {
-    animation-name: flow;
-    animation-duration: 10s;
-    animation-fill-mode: forwards;
-    color: white;
-    font-size: 2em;
-}
+
 @keyframes flow {
     from {
         transform: translateX(0);
