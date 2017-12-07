@@ -104,17 +104,19 @@
      * @param e - video element
      * @private
      */
-    function _requestFullscreen(e) {
-        if (e.requestFullscreen) {
-            e.requestFullscreen();
-        } else if (e.mozRequestFullScreen) {
-            e.mozRequestFullScreen();
-        } else if (e.msRequestFullscreen) {
-            e.msRequestFullscreen();
-        } else if (e.webkitRequestFullscreen) {
-            e.webkitRequestFullscreen();
-        } else {
-            console.log("Your browser doesn't support requestFullscreen");
+    function _requestFullscreen(element) {
+        try {
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+            } else if (element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+            } else if (element.msRequestFullscreen) {
+                element.msRequestFullscreen();
+            } else {
+                element.webkitRequestFullscreen();
+            }
+        } catch (e) {
+            console.error("Your browser doesn't support requestFullscreen");
         }
     }
 
@@ -123,16 +125,19 @@
      * @private
      */
     function _exitFullscreen() {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.mozCancelFullScreen) {
-            document.mozCancelFullScreen();
-        } else if (document.msExitFullscreen) {
-            document.msExitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        } else {
-            console.log("Your browser doesn't support exitFullscreen");
+        try {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            } else {
+                document.webkitExitFullscreen();
+            }
+        }
+        catch (e) {
+            console.error("Your browser doesn't support exitFullscreen");
         }
     }
 
@@ -190,7 +195,11 @@
      * @param src - source of the danmaku
      */
     DanmakuPlayer.prototype.initialize = function (url, src) {
-        this.createVideo(url);
+        if (!url) {
+            console.error("url must be specified");
+        } else {
+            this.createVideo(url);
+        }
         this.createPlayingComponents();
         this.setPlaying();
         this.setVolume();
@@ -223,7 +232,11 @@
         video.className = "video";
         danmakuBlock.className = "danmaku-block";
         videoBlock.className = "video-block";
-        video.innerHTML = "<source src='" + url + "'>";
+        if (!url) {
+            console.error("url must be specified");
+        } else {
+            video.innerHTML = "<source src='" + url + "'>";
+        }
 
         /**
          * build DOM tree
@@ -394,12 +407,9 @@
         /**
          * initialize
          */
-        var volumeRanges = document.getElementsByClassName("volume-range"),
-            volumeRange = volumeRanges[this.i],
-            volumeButtons = document.getElementsByClassName("volume"),
-            volumeButton = volumeButtons[this.i],
-            videos = document.getElementsByClassName("video"),
-            video = videos[this.i];
+        var volumeRange = document.getElementsByClassName("volume-range")[this.i],
+            volumeButton = document.getElementsByClassName("volume")[this.i],
+            video = document.getElementsByClassName("video")[this.i];
 
         /**
          * adjust the volume
@@ -543,7 +553,11 @@
              * get danmakus info from localStorage
              */
             if (typeof src === "object") {
-                var danmakus = JSON.parse(src);
+                if (Array.isArray(JSON.parse(src))) {
+                    var danmakus = JSON.parse(src);
+                } else {
+                    console.error("the format of danmaku is not correct");
+                }
             } else if (localStorage.getItem("danmakus")) {
                 danmakus = JSON.parse(localStorage.getItem("danmakus"));
             } else {
@@ -631,7 +645,11 @@
          * get danmakus info from localStorage
          */
         if (typeof src === "object") {
-            var data = JSON.parse(src);
+            if (Array.isArray(JSON.parse(src))) {
+                var data = JSON.parse(src);
+            } else {
+                console.error("the format of danmaku is not correct");
+            }
         } else if (localStorage.getItem("danmakus")) {
             data = JSON.parse(localStorage.getItem("danmakus"));
         } else {
@@ -742,9 +760,12 @@
         resize.className = "resize-bar";
         close.className = "close";
         smallVideo.className = "small-video";
-
-        container.style.top = (window.innerHeight - 200 - bottom) + "px";
-        container.style.left = (window.innerWidth - 320 - bottom) + "px";
+        if (typeof bottom === "number" && typeof right === "number") {
+            container.style.top = (window.innerHeight - 200 - bottom) + "px";
+            container.style.left = (window.innerWidth - 320 - right) + "px";
+        } else {
+            console.error("bottom and right aren't specified");
+        }
 
         move.innerHTML = "move";
         resize.innerHTML = "resize";
@@ -902,7 +923,12 @@
     window.GenerateDanmakuPlayers = function (className, i, n) {
         var players = [];
         for (var j = 0; j < i; j++) {
-            players[j] = new DanmakuPlayer(className, j, n);
+            try {
+                players[j] = new DanmakuPlayer(className, j, n);
+            }
+            catch (e) {
+                console.error("some arguments haven't been specified")
+            }
         }
         return players;
     };
