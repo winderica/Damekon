@@ -1,5 +1,6 @@
-require('../style/index.css');
+//require('../style/index.css');
 (function (window) {
+
     /**
      * represents a danmaku
      * @param obj
@@ -72,12 +73,13 @@ require('../style/index.css');
      * @constructor
      * @param className - the class name of the video container
      * @param i - the index of current video
+     * @param n - the index of video to be played as small video
      */
-    function DanmakuPlayer(className, i) {
+    function DanmakuPlayer(className, i, n) {
         this.className = className;
         this.videoContainer = document.getElementsByClassName(this.className)[i];
         this.i = i;
-
+        this.n = n ? n : 0;
         /**
          * default style of danmakus
          * @type {{opacity: number, fontSize: number, speed: number, range: [number,number], color: string, data: Array}}
@@ -96,7 +98,6 @@ require('../style/index.css');
          */
         this.store = [];
     }
-
 
     /**
      * go into full screen mode
@@ -157,23 +158,21 @@ require('../style/index.css');
      * play/pause the video and change the icon of the playpause button(when click)
      * @private
      */
-    function _changePlayPause(i) {
+    function _changePlayPause(i, n) {
         return function () {
-            var videos = document.getElementsByClassName("video"),
-                video = videos[i],
-                playPauses = document.getElementsByClassName("playpause"),
-                playPause = playPauses[i],
+            var video = document.getElementsByClassName("video")[i],
+                playPause = document.getElementsByClassName("playpause")[i],
                 smallVideo = document.getElementsByClassName("small-video")[0];
             if (video.paused || video.ended) {
                 playPause.className = "command playpause" + " pause";
                 video.play();
-                if (i === 0) {
+                if (i === n) {
                     smallVideo.play();
                 }
             } else {
                 playPause.className = "command playpause" + " play";
                 video.pause();
-                if (i === 0) {
+                if (i === n) {
                     smallVideo.pause();
                 }
             }
@@ -202,9 +201,16 @@ require('../style/index.css');
         this.setPlaying();
         this.setVolume();
         this.createDanmakuComponents();
+        this.sendDanmaku();
         this.loadDanmaku();
-        this.createSmallVideo(url);
-        this.setSmallVideo();
+        if (this.i === this.n) {
+            this.createSmallVideo(20, 20);
+            this.setSmallVideo();
+            this.dragSmallVideo();
+            this.resizeSmallVideo();
+            this.closeSmallVideo();
+        }
+        this.smallVideoSelector();
     };
 
     /**
@@ -250,7 +256,6 @@ require('../style/index.css');
             volume = document.createElement("button"),
             volumeRange = document.createElement("input"),
             time = document.createElement("div"),
-            float =  document.createElement("button"),
             danmaku = document.createElement("button"),
             fullScreen = document.createElement("button"),
             playBlocks = document.getElementsByClassName("play-block"),
@@ -266,7 +271,6 @@ require('../style/index.css');
         volume.className = "command volume on";
         volumeRange.className = "volume-range";
         time.className = "time";
-        float.className = "command float";
         danmaku.className = "command danmaku";
         fullScreen.className = "command full";
 
@@ -278,6 +282,7 @@ require('../style/index.css');
         progressBar.innerHTML = "<span class='progress'></span>";
         time.innerHTML = "<span class='present-time'>00:00</span>/<span class='total-time'>00:00</span>";
 
+
         /**
          * execute function _exitFullscreen or _requestFullscreen when click the fullScreen button
          */
@@ -286,7 +291,6 @@ require('../style/index.css');
                 _exitFullscreen();
                 playInfo.style.position = "relative";
                 playInfo.style.zIndex = "0";
-
             } else {
                 _requestFullscreen(video);
                 playInfo.style.position = "fixed";
@@ -314,7 +318,6 @@ require('../style/index.css');
         commandBlock.appendChild(time);
         commandBlock.appendChild(fullScreen);
         commandBlock.appendChild(danmaku);
-        commandBlock.appendChild(float);
         playInfo.appendChild(progressBar);
         playInfo.appendChild(commandBlock);
         playBlock.appendChild(playInfo);
@@ -328,10 +331,8 @@ require('../style/index.css');
          * initialize
          */
         var i = this.i,
-            videos = document.getElementsByClassName("video"),
-            video = videos[i],
-            playPauses = document.getElementsByClassName("playpause"),
-            playPause = playPauses[i];
+            video = document.getElementsByClassName("video")[i],
+            playPause = document.getElementsByClassName("playpause")[i];
 
         /**
          * set total time of the video
@@ -364,11 +365,12 @@ require('../style/index.css');
             progress.style.width = (video.currentTime / video.duration * 100) + "%";
         });
 
+
         /**
          * switch between play and pause
          */
-        video.addEventListener("click", _changePlayPause(this.i));
-        playPause.addEventListener("click", _changePlayPause(this.i));
+        video.addEventListener("click", _changePlayPause(this.i, this.n));
+        playPause.addEventListener("click", _changePlayPause(this.i, this.n));
 
         /**
          * TODO
@@ -433,9 +435,6 @@ require('../style/index.css');
          * initialize
          */
         var i = this.i,
-            store = this.store,
-            defaults = this.defaults,
-            canvas = document.getElementsByClassName("danmaku-block")[i],
             danmakuCommand = document.createElement("div"),
             input = document.createElement("input"),
             send = document.createElement("button"),
@@ -506,6 +505,19 @@ require('../style/index.css');
             }
         });
 
+    };
+
+    /**
+     * send danmaku
+     * @param func - the callback function
+     */
+    DanmakuPlayer.prototype.sendDanmaku = function (func) {
+        var i = this.i,
+            store = this.store,
+            defaults = this.defaults,
+            canvas = document.getElementsByClassName("danmaku-block")[i],
+            input = document.getElementsByClassName("danmaku-input")[i],
+            send = document.getElementsByClassName("danmaku-sender")[i];
         /**
          * send danmaku when click the send button or press return key
          */
@@ -520,8 +532,9 @@ require('../style/index.css');
          * danmaku sender
          */
         function sendDanmaku() {
+
             /**
-             * initailize
+             * initialize
              */
             var video = document.getElementsByClassName("video")[i],
                 input = document.getElementsByClassName("danmaku-input")[i],
@@ -579,7 +592,16 @@ require('../style/index.css');
              * reset the value of input box
              */
             input.value = "";
+
+            if (typeof func === "function") {
+                func();
+            }
         }
+
+        /**
+         * callback
+         */
+
     };
 
     /**
@@ -690,141 +712,222 @@ require('../style/index.css');
 
     /**
      * create a floating small video window
-     * @param url
+     * @param right
+     * @param bottom
+     * @param func - the callback function
      */
-    DanmakuPlayer.prototype.createSmallVideo = function (url) {
-        if (this.i === 0) {
-            /**
-             * initialize
-             */
-            var container = document.createElement("div"),
-                move = document.createElement("button"),
-                resize = document.createElement("button"),
-                close = document.createElement("button"),
-                smallVideo = document.createElement("video");
+    DanmakuPlayer.prototype.createSmallVideo = function (bottom, right, func) {
+        /**
+         * initialize
+         */
+        var container = document.createElement("div"),
+            move = document.createElement("button"),
+            resize = document.createElement("button"),
+            close = document.createElement("button"),
+            smallVideo = document.createElement("video");
 
-            container.className = "small-video-container";
-            move.className = "drag-bar";
-            resize.className = "resize-bar";
-            close.className = "close";
-            smallVideo.className = "small-video";
+        container.className = "small-video-container";
+        move.className = "drag-bar";
+        resize.className = "resize-bar";
+        close.className = "close";
+        smallVideo.className = "small-video";
 
-            move.innerHTML = "move";
-            resize.innerHTML = "resize";
-            close.innerHTML = "close";
-            smallVideo.innerHTML = "<source src='" + url + "'>";
+        container.style.top = (window.innerHeight - 200 - bottom) + "px";
+        container.style.left = (window.innerWidth - 320 - bottom) + "px";
 
-            /**
-             * build DOM tree
-             */
-            container.appendChild(move);
-            container.appendChild(resize);
-            container.appendChild(close);
-            container.appendChild(smallVideo);
-            document.body.appendChild(container);
+        move.innerHTML = "move";
+        resize.innerHTML = "resize";
+        close.innerHTML = "close";
+        smallVideo.innerHTML = document.getElementsByClassName("video")[this.n].innerHTML;
+
+        if (typeof func === "function") {
+            func(this.n);
+        }
+
+        /**
+         * build DOM tree
+         */
+        container.appendChild(move);
+        container.appendChild(resize);
+        container.appendChild(close);
+        container.appendChild(smallVideo);
+        document.body.appendChild(container);
+    };
+
+    /**
+     * show/hide the small video window when scroll
+     */
+    DanmakuPlayer.prototype.setSmallVideo = function () {
+        var container = document.getElementsByClassName("small-video-container")[0],
+            video = document.getElementsByClassName("video")[0];
+
+        window.addEventListener("scroll", function () {
+            var toTop = video.getBoundingClientRect().top;
+            if (toTop + video.offsetHeight < 0) {
+                container.style.display = "block";
+            } else {
+                container.style.display = "none";
+            }
+        });
+    };
+
+    /**
+     * drag the small video window
+     * @param func - the callback function
+     */
+    DanmakuPlayer.prototype.dragSmallVideo = function (func) {
+        var container = document.getElementsByClassName("small-video-container")[0],
+            move = document.getElementsByClassName("drag-bar")[0],
+            x1, x2, y1, y2;
+
+        move.addEventListener("mousedown", dragMouseDown);
+        function dragMouseDown(e) {
+            e = e || window.event;
+            x2 = e.clientX;
+            y2 = e.clientY;
+            window.addEventListener("mousemove", elementDrag);
+            window.addEventListener("mouseup", closeDragElement)
+        }
+        function elementDrag(e) {
+            e = e || window.event;
+            x1 = x2 - e.clientX;
+            y1 = y2 - e.clientY;
+            x2 = e.clientX;
+            y2 = e.clientY;
+            container.style.top = (container.offsetTop - y1) + "px";
+            container.style.left = (container.offsetLeft - x1) + "px";
+        }
+        function closeDragElement() {
+            window.removeEventListener("mouseup", closeDragElement);
+            window.removeEventListener("mousemove", elementDrag);
+            if (typeof func === "function") {
+                func();
+            }
         }
     };
 
     /**
-     * add event handlers of small video
+     * resize the small video window
+     * @param func - the callback function
      */
-    DanmakuPlayer.prototype.setSmallVideo = function () {
-        if (this.i === 0) {
-            /**
-             * initialize
-             */
-            var container = document.getElementsByClassName("small-video-container")[0],
-                move = document.getElementsByClassName("drag-bar")[0],
-                resize = document.getElementsByClassName("resize-bar")[0],
-                close = document.getElementsByClassName("close")[0],
-                smallVideo = document.getElementsByClassName("small-video")[0],
-                video = document.getElementsByClassName("video")[0],
-                x1, x2, y1, y2, x, w;
+    DanmakuPlayer.prototype.resizeSmallVideo = function (func) {
+        var container = document.getElementsByClassName("small-video-container")[0],
+            resize = document.getElementsByClassName("resize-bar")[0],
+            smallVideo = document.getElementsByClassName("small-video")[0],
+            x, w;
 
-            /**
-             * show/hide the small video window when scroll
-             */
-            window.addEventListener("scroll", function () {
-                var toTop = video.getBoundingClientRect().top;
-                if (toTop + video.offsetHeight < 0) {
-                    container.style.display = "block";
-                } else {
-                    container.style.display = "none";
-                }
-            });
+        resize.addEventListener("mousedown", resizeMouseDown);
+        function resizeMouseDown(e) {
+            e = e || window.event;
+            x = e.clientX;
+            w = smallVideo.offsetWidth;
+            window.addEventListener("mousemove", elementResize);
+            window.addEventListener("mouseup", closeResizeElement)
+        }
+        function elementResize(e) {
+            e = e || window.event;
+            smallVideo.style.width = (w + e.clientX - x) + "px";
+            container.style.width = smallVideo.style.width;
+            smallVideo.style.height = ((w + e.clientX - x) / 16 * 9) + "px";
+        }
+        function closeResizeElement() {
+            window.removeEventListener("mouseup", closeResizeElement);
+            window.removeEventListener("mousemove", elementResize);
 
-            /**
-             * drag the small video window
-             */
-            move.addEventListener("mousedown", dragMouseDown);
-            function dragMouseDown(e) {
-                e = e || window.event;
-                x2 = e.clientX;
-                y2 = e.clientY;
-                window.addEventListener("mousemove", elementDrag);
-                window.addEventListener("mouseup", closeDragElement)
+            if (typeof func === "function") {
+                func();
             }
-            function elementDrag(e) {
-                e = e || window.event;
-                x1 = x2 - e.clientX;
-                y1 = y2 - e.clientY;
-                x2 = e.clientX;
-                y2 = e.clientY;
-                container.style.top = (container.offsetTop - y1) + "px";
-                container.style.left = (container.offsetLeft - x1) + "px";
-            }
-            function closeDragElement() {
-                window.removeEventListener("mouseup", closeDragElement);
-                window.removeEventListener("mousemove", elementDrag);
-            }
-
-            /**
-             * resize the small video window
-             */
-            resize.addEventListener("mousedown", resizeMouseDown);
-            function resizeMouseDown(e) {
-                e = e || window.event;
-                x = e.clientX;
-                w = smallVideo.offsetWidth;
-                window.addEventListener("mousemove", elementResize);
-                window.addEventListener("mouseup", closeResizeElement)
-            }
-            function elementResize(e) {
-                e = e || window.event;
-                smallVideo.style.width = (w - e.clientX + x) + "px";
-                container.style.width = smallVideo.style.width;
-                smallVideo.style.height = ((w - e.clientX + x) / 16 * 9) + "px";
-            }
-            function closeResizeElement() {
-                window.removeEventListener("mouseup", closeResizeElement);
-                window.removeEventListener("mousemove", elementResize);
-            }
-
-            /**
-             * close the small video window
-             */
-            close.addEventListener("click", function () {
-                if (smallVideo.style.visibility === "hidden") {
-                    smallVideo.style.visibility = "visible";
-                    close.innerHTML = "close";
-                } else {
-                    smallVideo.style.visibility = "hidden";
-                    close.innerHTML = "open";
-                }
-            })
         }
     };
 
-    
-    window.DanmakuPlayer = function (className, i) {
-        return new DanmakuPlayer(className, i);
+    /**
+     * close the small video window
+     * @param func - the callback function
+     */
+    DanmakuPlayer.prototype.closeSmallVideo = function (func) {
+        var close = document.getElementsByClassName("close")[0],
+            smallVideo = document.getElementsByClassName("small-video")[0];
+        close.addEventListener("click", function () {
+            if (smallVideo.style.visibility === "hidden") {
+                smallVideo.style.visibility = "visible";
+                close.innerHTML = "close";
+
+                if (typeof func === "function") {
+                    func();
+                }
+            } else {
+                smallVideo.style.visibility = "hidden";
+                close.innerHTML = "open";
+            }
+        });
+    };
+
+    /**
+     * select which video to play in the small video
+     */
+    DanmakuPlayer.prototype.smallVideoSelector = function () {
+        if (!document.getElementsByClassName("selector")[0]) {
+            var selector = document.createElement("div");
+            selector.className = "selector";
+            document.body.appendChild(selector);
+        }
+        var btn = document.createElement("button");
+        selector = document.getElementsByClassName("selector")[0];
+        btn.innerHTML = this.i + 1;
+        selector.appendChild(btn);
+        btn.addEventListener("click", function () {
+            this.n = btn.innerHTML - 1;
+            var video = document.getElementsByClassName("video")[btn.innerHTML - 1];
+            var smallVideo = document.getElementsByClassName("small-video")[0];
+            smallVideo.innerHTML = video.innerHTML;
+            smallVideo.currentTime = video.currentTime;
+            smallVideo.play();
+        })
+    };
+
+    window.GenerateDanmakuPlayers = function (className, i, n) {
+        var players = [];
+        for (var j = 0; j < i; j++) {
+            players[j] = new DanmakuPlayer(className, j, n);
+        }
+        return players;
     };
 })(window);
 
+var array = window.GenerateDanmakuPlayers("test", 3, 1);
+array[0].initialize("video/[SumiSora][LittleBusters][SP][GB][720p].mp4");
+array[1].initialize("video/[SumiSora][LittleBusters_Refrain][01][GB][720p].mp4");
+array[2].initialize("video/[SumiSora][LittleBusters_Refrain][02][GB][720p].mp4");
 
-var a = window.DanmakuPlayer("test", 1);
-a.setDefaults({'color':'purple', 'speed': 1});
-window.DanmakuPlayer("test", 0).initialize("video/[SumiSora][LittleBusters][SP][GB][720p].mp4");
-a.initialize("video/[SumiSora][LittleBusters_Refrain][01][GB][720p].mp4");
-window.DanmakuPlayer("test", 2).initialize("video/[SumiSora][LittleBusters_Refrain][02][GB][720p].mp4");
-
+/* or
+var player = array[2];
+player.setDefaults({
+    opacity: 0.5,
+    fontSize: 40,
+    speed: 3,
+    range: [0, 0.5],
+    color: 'black'
+});
+player.createVideo("video/[SumiSora][LittleBusters_Refrain][02][GB][720p].mp4");
+player.createPlayingComponents();
+player.setPlaying();
+player.setVolume();
+player.createDanmakuComponents();
+player.sendDanmaku(function () {
+    console.log("succeeded in sending danmaku");
+});
+player.loadDanmaku();
+player.createSmallVideo(function (a) {
+    console.log("the small video is now playing the video of no. " + a);
+});
+player.setSmallVideo();
+player.dragSmallVideo(function () {
+    console.log("succeeded in dragging small video");
+});
+player.resizeSmallVideo(function () {
+    console.log("succeeded in resizing small video");
+});
+player.closeSmallVideo(function () {
+    console.log("succeeded in closing small video");
+});
+*/

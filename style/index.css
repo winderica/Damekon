@@ -1,7 +1,10 @@
 * {
     box-sizing: border-box;
 }
-
+@font-face {
+    src: url("../font/segmdl2.ttf");
+    font-family: "Segoe MDL2 Assets";
+}
 @media screen and (min-width: 1000px) {
     .play-block {
         width: 960px;
@@ -21,8 +24,9 @@
 .play-block {
     overflow: hidden;
     color: rgb(44, 141, 232);
-    margin-bottom: 20px;
     position: relative;
+    margin-bottom: 20px;
+    margin-left: 10%;
 }
 .video-block {
     position: relative;
@@ -102,9 +106,6 @@ video::-webkit-media-controls-enclosure {
 .danmaku:before {
     content: "";
 }
-.float:before {
-    content: "";
-}
 .danmaku-sender:before {
     content: '';
 }
@@ -148,8 +149,8 @@ video::-webkit-media-controls-enclosure {
 
 .small-video-container {
     position: fixed;
-    right: 20px;
-    bottom: 20px;
+    top: calc(100% - 220px);
+    left: calc(100% - 340px);
     display: none;
     width: 320px;
     overflow: hidden;
@@ -233,7 +234,17 @@ input[type='radio']:checked {
         transform: translateX(-2000px);
     }
 }
-
+.selector {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    height: 10px;
+}
+.selector * {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
 
 .test {
     overflow: hidden;
