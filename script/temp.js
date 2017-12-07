@@ -158,23 +158,16 @@
      * play/pause the video and change the icon of the playpause button(when click)
      * @private
      */
-    function _changePlayPause(i, n) {
+    function _changePlayPause(i) {
         return function () {
             var video = document.getElementsByClassName("video")[i],
-                playPause = document.getElementsByClassName("playpause")[i],
-                smallVideo = document.getElementsByClassName("small-video")[0];
+                playPause = document.getElementsByClassName("playpause")[i];
             if (video.paused || video.ended) {
                 playPause.className = "command playpause" + " pause";
                 video.play();
-                if (i === n) {
-                    smallVideo.play();
-                }
             } else {
                 playPause.className = "command playpause" + " play";
                 video.pause();
-                if (i === n) {
-                    smallVideo.pause();
-                }
             }
         }
     }
@@ -194,15 +187,16 @@
     /**
      * initialize
      * @param url - url of the video
+     * @param src - source of the danmaku
      */
-    DanmakuPlayer.prototype.initialize = function (url) {
+    DanmakuPlayer.prototype.initialize = function (url, src) {
         this.createVideo(url);
         this.createPlayingComponents();
         this.setPlaying();
         this.setVolume();
         this.createDanmakuComponents();
-        this.sendDanmaku();
-        this.loadDanmaku();
+        this.sendDanmaku(src);
+        this.loadDanmaku(src);
         if (this.i === this.n) {
             this.createSmallVideo(20, 20);
             this.setSmallVideo();
@@ -509,9 +503,10 @@
 
     /**
      * send danmaku
+     * @param src - source of the danmaku
      * @param func - the callback function
      */
-    DanmakuPlayer.prototype.sendDanmaku = function (func) {
+    DanmakuPlayer.prototype.sendDanmaku = function (src, func) {
         var i = this.i,
             store = this.store,
             defaults = this.defaults,
@@ -547,15 +542,20 @@
             /**
              * get danmakus info from localStorage
              */
-            if (localStorage.getItem("danmakus")) {
-                var danmakus = JSON.parse(localStorage.getItem("danmakus"));
+            if (typeof src === "object") {
+                var danmakus = JSON.parse(src);
+            } else if (localStorage.getItem("danmakus")) {
+                danmakus = JSON.parse(localStorage.getItem("danmakus"));
             } else {
+                /**
+                 * danmakus is a n * j array
+                 * @type {Array}
+                 */
                 danmakus = [];
                 for (var j = 0; j < document.getElementsByClassName("video").length; j++) {
                     danmakus.push([]);
                 }
             }
-
             /**
              * set options that user chose (use some magic numbers or it will be very complex)
              */
@@ -581,7 +581,11 @@
              * add danmaku info to localStorage
              */
             danmakus[i].push(item);
-            localStorage.setItem("danmakus", JSON.stringify(danmakus));
+            if (typeof src === "object") {
+                src = JSON.stringify(danmakus);
+            } else {
+                localStorage.setItem("danmakus", JSON.stringify(danmakus));
+            }
 
             /**
              * store the danmaku
@@ -606,8 +610,9 @@
 
     /**
      * load and display the danmakus in localStorage and store
+     * @param src - source of the danmaku
      */
-    DanmakuPlayer.prototype.loadDanmaku = function () {
+    DanmakuPlayer.prototype.loadDanmaku = function (src) {
         /**
          * initialize
          */
@@ -625,9 +630,15 @@
         /**
          * get danmakus info from localStorage
          */
-        if (localStorage.getItem("danmakus")) {
-            var data = JSON.parse(localStorage.getItem("danmakus"));
+        if (typeof src === "object") {
+            var data = JSON.parse(src);
+        } else if (localStorage.getItem("danmakus")) {
+            data = JSON.parse(localStorage.getItem("danmakus"));
         } else {
+            /**
+             * data is a n * j array
+             * @type {Array}
+             */
             data = [];
             for (var j = 0; j < document.getElementsByClassName("video").length; j++) {
                 data.push([]);
@@ -738,7 +749,6 @@
         move.innerHTML = "move";
         resize.innerHTML = "resize";
         close.innerHTML = "close";
-        smallVideo.innerHTML = document.getElementsByClassName("video")[this.n].innerHTML;
 
         if (typeof func === "function") {
             func(this.n);
@@ -875,14 +885,18 @@
         selector = document.getElementsByClassName("selector")[0];
         btn.innerHTML = this.i + 1;
         selector.appendChild(btn);
-        btn.addEventListener("click", function () {
-            this.n = btn.innerHTML - 1;
-            var video = document.getElementsByClassName("video")[btn.innerHTML - 1];
-            var smallVideo = document.getElementsByClassName("small-video")[0];
-            smallVideo.innerHTML = video.innerHTML;
-            smallVideo.currentTime = video.currentTime;
-            smallVideo.play();
-        })
+        btn.addEventListener("click", smallVideoPlay(this.i));
+
+        function smallVideoPlay(i) {
+            return function () {
+                var video = document.getElementsByClassName("video")[i];
+                var smallVideo = document.getElementsByClassName("small-video")[0];
+                console.log(video.innerHTML);
+                smallVideo.innerHTML = video.innerHTML;
+                smallVideo.currentTime = video.currentTime;
+                smallVideo.play();
+            }
+        }
     };
 
     window.GenerateDanmakuPlayers = function (className, i, n) {
@@ -913,7 +927,7 @@ player.createPlayingComponents();
 player.setPlaying();
 player.setVolume();
 player.createDanmakuComponents();
-player.sendDanmaku(function () {
+player.sendDanmaku(src, function () {
     console.log("succeeded in sending danmaku");
 });
 player.loadDanmaku();

@@ -26,7 +26,6 @@ and danmaku sending/storage:
 * user-adjustable color
 * local storage danmaku
 * (TODO: user-adjustable opacity & font size)
-* (TODO: import danmaku)
 
 ## API Reference
 
@@ -38,9 +37,9 @@ for example:
     var myDanmakuPlayers = window.GenerateDanmakuPlayers("player", 3, 0);
     
     
-and then initial the object in the array using `initialize` function by passing the url:
+and then initial the object in the array using `initialize` function by passing the url(and the source of danmaku in JSON if necessary):
 
-    myDanmakuPlayers[0].initialize("your.url");
+    myDanmakuPlayers[0].initialize("your.url", "danmaku.src");
     
 or you can change the default style of danmaku by yourself using `setDefaults` function like below:
 
