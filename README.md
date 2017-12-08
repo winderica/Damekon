@@ -69,4 +69,4 @@ Q: What does Damekon means?
 
 A: ダメコン - **_the answer to LIFE, the UNIVERSE, and EVERYTHING_**
 
-![](https://static.mengniang.org/common/0/04/043a.png)
+![](src/img/TANAKA.png)
