@@ -40,7 +40,6 @@ video::-webkit-media-controls {
 video::-webkit-media-controls-enclosure {
     display: none !important;
 }
-
 .play-info {
     overflow: hidden;
     border: rgb(222, 222, 222) 1px solid;
@@ -51,7 +50,6 @@ video::-webkit-media-controls-enclosure {
     left: 0;
     position: relative;
 }
-
 .progress-bar {
     height: 2px;
     width: 99%;
@@ -66,7 +64,6 @@ video::-webkit-media-controls-enclosure {
     width: 0;
     background: rgb(44, 141, 232);
 }
-
 .command-block {
     display: block;
     margin-top: 5px;
@@ -97,6 +94,9 @@ video::-webkit-media-controls-enclosure {
 .off:before {
     content: "";
 }
+.popup:before {
+    content: "";
+}
 .full:before {
     content: "";
 }
@@ -115,7 +115,7 @@ video::-webkit-media-controls-enclosure {
 .playpause {
     float: left;
 }
-.full, .exit-full, .danmaku, .float {
+.full, .exit-full, .danmaku, .popup {
     float: right;
 }
 .volume-block {
@@ -146,7 +146,6 @@ video::-webkit-media-controls-enclosure {
     margin-left: 5px;
     float: left;
 }
-
 .small-video-container {
     position: fixed;
     top: calc(100% - 220px);
@@ -225,7 +224,6 @@ input[type='radio']:checked {
     border: 1px solid rgb(44, 141, 232);
     background-color: rgba(255, 255, 255, 0.4);
 }
-
 @keyframes flow {
     from {
         transform: translateX(0);
@@ -233,19 +231,4 @@ input[type='radio']:checked {
     to {
         transform: translateX(-2000px);
     }
-}
-.selector {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    height: 10px;
-}
-.selector * {
-    background: none;
-    border: none;
-    cursor: pointer;
-}
-
-.test {
-    overflow: hidden;
 }

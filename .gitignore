@@ -2,3 +2,4 @@
 *.mp4
 .gitattributes
 .gitattributes
+node_modules

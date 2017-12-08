@@ -1,6 +1,10 @@
-# Damekon - a danmaku player
+# Damekon - a danmaku player plugin
 
 A simple Danmaku-player plugin written in Javascript
+
+## Demo
+
+[click here](https://winderica.github.io/damekon/)
 
 ## Basic functions
 
@@ -18,7 +22,8 @@ and a floating window:
 * move
 * resize
 * close
-* (TODO: select video to show)
+* select video to show
+* (TODO: synchronize the progress rather than reset it)
 
 and danmaku sending/storage:
 * user-adjustable speed (including fixed danmaku)
@@ -58,16 +63,10 @@ and you can passing a callback function to some events:
         console.log("succeeded in resizing small video");
     });
     
-## Other TODOs
-
-* error capture
-* uglify the js and css
-* use webpack to pack it
-
 ## FAQ
 
-Q: What is the meaning of Damekon?
+Q: What does Damekon means?
 
-A: ダメコン - **_the answer to life the universe and everything_**
+A: ダメコン - **_the answer to LIFE, the UNIVERSE, and EVERYTHING_**
 
 ![](https://static.mengniang.org/common/0/04/043a.png)

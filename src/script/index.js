@@ -1,4 +1,4 @@
-//require('../style/index.css');
+require('../style/index.css');
 (function (window) {
 
     /**
@@ -79,7 +79,7 @@
         this.className = className;
         this.videoContainer = document.getElementsByClassName(this.className)[i];
         this.i = i;
-        this.n = n ? n : 0;
+        this.n = n;
         /**
          * default style of danmakus
          * @type {{opacity: number, fontSize: number, speed: number, range: [number,number], color: string, data: Array}}
@@ -168,10 +168,10 @@
             var video = document.getElementsByClassName("video")[i],
                 playPause = document.getElementsByClassName("playpause")[i];
             if (video.paused || video.ended) {
-                playPause.className = "command playpause" + " pause";
+                playPause.className = "command playpause pause";
                 video.play();
             } else {
-                playPause.className = "command playpause" + " play";
+                playPause.className = "command playpause play";
                 video.pause();
             }
         }
@@ -206,14 +206,11 @@
         this.createDanmakuComponents();
         this.sendDanmaku(src);
         this.loadDanmaku(src);
-        if (this.i === this.n) {
-            this.createSmallVideo(20, 20);
-            this.setSmallVideo();
-            this.dragSmallVideo();
-            this.resizeSmallVideo();
-            this.closeSmallVideo();
-        }
-        this.smallVideoSelector();
+        this.createSmallVideo(20, 20);
+        this.setSmallVideo();
+        this.dragSmallVideo();
+        this.resizeSmallVideo();
+        this.closeSmallVideo();
     };
 
     /**
@@ -265,10 +262,9 @@
             time = document.createElement("div"),
             danmaku = document.createElement("button"),
             fullScreen = document.createElement("button"),
-            playBlocks = document.getElementsByClassName("play-block"),
-            playBlock = playBlocks[i],
-            videos = document.getElementsByClassName("video"),
-            video = videos[i];
+            popup = document.createElement("button"),
+            playBlock = document.getElementsByClassName("play-block")[i],
+            video = document.getElementsByClassName("video")[i];
 
         playInfo.className = "play-info";
         progressBar.className = "progress-bar";
@@ -280,6 +276,7 @@
         time.className = "time";
         danmaku.className = "command danmaku";
         fullScreen.className = "command full";
+        popup.className = "command popup";
 
         volumeRange.setAttribute("min", "0");
         volumeRange.setAttribute("max", "1");
@@ -289,6 +286,38 @@
         progressBar.innerHTML = "<span class='progress'></span>";
         time.innerHTML = "<span class='present-time'>00:00</span>/<span class='total-time'>00:00</span>";
 
+        popup.addEventListener("click", function () {
+            var smallVideo = document.getElementsByClassName("small-video")[0];
+            DanmakuPlayer.prototype.n = i;
+            smallVideo.innerHTML = video.innerHTML;
+            smallVideo.load();
+            smallVideo.pause();
+            video.play();
+            video.currentTime = 0;
+            smallVideo.play();
+            playPause.className = "command playpause pause";
+        });
+
+        /**
+         * switch between play and pause
+         */
+        video.addEventListener("click", _changePlayPause(this.i, this.n));
+        playPause.addEventListener("click", _changePlayPause(this.i, this.n));
+
+        playPause.addEventListener("click", controlSmallVideo());
+
+        function controlSmallVideo() {
+            return function () {
+                var smallVideo = document.getElementsByClassName("small-video")[0];
+                if (DanmakuPlayer.prototype.n === i) {
+                    if (smallVideo.paused || smallVideo.ended) {
+                        smallVideo.play();
+                    } else {
+                        smallVideo.pause();
+                    }
+                }
+            }
+        }
 
         /**
          * execute function _exitFullscreen or _requestFullscreen when click the fullScreen button
@@ -298,10 +327,12 @@
                 _exitFullscreen();
                 playInfo.style.position = "relative";
                 playInfo.style.zIndex = "0";
+                fullScreen.setAttribute("class", "full command");
             } else {
                 _requestFullscreen(video);
                 playInfo.style.position = "fixed";
                 playInfo.style.zIndex = "2147483647";
+                fullScreen.setAttribute("class", "exit-full command");
             }
         });
 
@@ -312,6 +343,7 @@
             if (!(document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement)) {
                 playInfo.style.position = "relative";
                 playInfo.style.zIndex = "0";
+                fullScreen.setAttribute("class", "full command");
             }
         });
 
@@ -325,6 +357,7 @@
         commandBlock.appendChild(time);
         commandBlock.appendChild(fullScreen);
         commandBlock.appendChild(danmaku);
+        commandBlock.appendChild(popup);
         playInfo.appendChild(progressBar);
         playInfo.appendChild(commandBlock);
         playBlock.appendChild(playInfo);
@@ -373,11 +406,7 @@
         });
 
 
-        /**
-         * switch between play and pause
-         */
-        video.addEventListener("click", _changePlayPause(this.i, this.n));
-        playPause.addEventListener("click", _changePlayPause(this.i, this.n));
+
 
         /**
          * TODO
@@ -746,60 +775,66 @@
      * @param func - the callback function
      */
     DanmakuPlayer.prototype.createSmallVideo = function (bottom, right, func) {
-        /**
-         * initialize
-         */
-        var container = document.createElement("div"),
-            move = document.createElement("button"),
-            resize = document.createElement("button"),
-            close = document.createElement("button"),
-            smallVideo = document.createElement("video");
+        if (this.i === this.n) {
 
-        container.className = "small-video-container";
-        move.className = "drag-bar";
-        resize.className = "resize-bar";
-        close.className = "close";
-        smallVideo.className = "small-video";
-        if (typeof bottom === "number" && typeof right === "number") {
-            container.style.top = (window.innerHeight - 200 - bottom) + "px";
-            container.style.left = (window.innerWidth - 320 - right) + "px";
-        } else {
-            console.error("bottom and right aren't specified");
+            /**
+             * initialize
+             */
+            var container = document.createElement("div"),
+                move = document.createElement("button"),
+                resize = document.createElement("button"),
+                close = document.createElement("button"),
+                smallVideo = document.createElement("video");
+
+            container.className = "small-video-container";
+            move.className = "drag-bar";
+            resize.className = "resize-bar";
+            close.className = "close";
+            smallVideo.className = "small-video";
+            if (typeof bottom === "number" && typeof right === "number") {
+                container.style.top = (window.innerHeight - 200 - bottom) + "px";
+                container.style.left = (window.innerWidth - 320 - right) + "px";
+            } else {
+                console.error("bottom and right aren't specified");
+            }
+
+            move.innerHTML = "move";
+            resize.innerHTML = "resize";
+            close.innerHTML = "close";
+
+            if (typeof func === "function") {
+                func(this.n);
+            }
+
+            /**
+             * build DOM tree
+             */
+            container.appendChild(move);
+            container.appendChild(resize);
+            container.appendChild(close);
+            container.appendChild(smallVideo);
+            document.body.appendChild(container);
         }
-
-        move.innerHTML = "move";
-        resize.innerHTML = "resize";
-        close.innerHTML = "close";
-
-        if (typeof func === "function") {
-            func(this.n);
-        }
-
-        /**
-         * build DOM tree
-         */
-        container.appendChild(move);
-        container.appendChild(resize);
-        container.appendChild(close);
-        container.appendChild(smallVideo);
-        document.body.appendChild(container);
     };
 
     /**
      * show/hide the small video window when scroll
      */
     DanmakuPlayer.prototype.setSmallVideo = function () {
-        var container = document.getElementsByClassName("small-video-container")[0],
-            video = document.getElementsByClassName("video")[0];
+        if (this.i === this.n) {
 
-        window.addEventListener("scroll", function () {
-            var toTop = video.getBoundingClientRect().top;
-            if (toTop + video.offsetHeight < 0) {
-                container.style.display = "block";
-            } else {
-                container.style.display = "none";
-            }
-        });
+            var container = document.getElementsByClassName("small-video-container")[0],
+                video = document.getElementsByClassName("video")[0];
+
+            window.addEventListener("scroll", function () {
+                var toTop = video.getBoundingClientRect().top;
+                if (toTop + video.offsetHeight < 0) {
+                    container.style.display = "block";
+                } else {
+                    container.style.display = "none";
+                }
+            });
+        }
     };
 
     /**
@@ -807,32 +842,38 @@
      * @param func - the callback function
      */
     DanmakuPlayer.prototype.dragSmallVideo = function (func) {
-        var container = document.getElementsByClassName("small-video-container")[0],
-            move = document.getElementsByClassName("drag-bar")[0],
-            x1, x2, y1, y2;
+        if (this.i === this.n) {
 
-        move.addEventListener("mousedown", dragMouseDown);
-        function dragMouseDown(e) {
-            e = e || window.event;
-            x2 = e.clientX;
-            y2 = e.clientY;
-            window.addEventListener("mousemove", elementDrag);
-            window.addEventListener("mouseup", closeDragElement)
-        }
-        function elementDrag(e) {
-            e = e || window.event;
-            x1 = x2 - e.clientX;
-            y1 = y2 - e.clientY;
-            x2 = e.clientX;
-            y2 = e.clientY;
-            container.style.top = (container.offsetTop - y1) + "px";
-            container.style.left = (container.offsetLeft - x1) + "px";
-        }
-        function closeDragElement() {
-            window.removeEventListener("mouseup", closeDragElement);
-            window.removeEventListener("mousemove", elementDrag);
-            if (typeof func === "function") {
-                func();
+            var container = document.getElementsByClassName("small-video-container")[0],
+                move = document.getElementsByClassName("drag-bar")[0],
+                x1, x2, y1, y2;
+
+            move.addEventListener("mousedown", dragMouseDown);
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+                x2 = e.clientX;
+                y2 = e.clientY;
+                window.addEventListener("mousemove", elementDrag);
+                window.addEventListener("mouseup", closeDragElement)
+            }
+
+            function elementDrag(e) {
+                e = e || window.event;
+                x1 = x2 - e.clientX;
+                y1 = y2 - e.clientY;
+                x2 = e.clientX;
+                y2 = e.clientY;
+                container.style.top = (container.offsetTop - y1) + "px";
+                container.style.left = (container.offsetLeft - x1) + "px";
+            }
+
+            function closeDragElement() {
+                window.removeEventListener("mouseup", closeDragElement);
+                window.removeEventListener("mousemove", elementDrag);
+                if (typeof func === "function") {
+                    func();
+                }
             }
         }
     };
@@ -842,31 +883,37 @@
      * @param func - the callback function
      */
     DanmakuPlayer.prototype.resizeSmallVideo = function (func) {
-        var container = document.getElementsByClassName("small-video-container")[0],
-            resize = document.getElementsByClassName("resize-bar")[0],
-            smallVideo = document.getElementsByClassName("small-video")[0],
-            x, w;
+        if (this.i === this.n) {
 
-        resize.addEventListener("mousedown", resizeMouseDown);
-        function resizeMouseDown(e) {
-            e = e || window.event;
-            x = e.clientX;
-            w = smallVideo.offsetWidth;
-            window.addEventListener("mousemove", elementResize);
-            window.addEventListener("mouseup", closeResizeElement)
-        }
-        function elementResize(e) {
-            e = e || window.event;
-            smallVideo.style.width = (w + e.clientX - x) + "px";
-            container.style.width = smallVideo.style.width;
-            smallVideo.style.height = ((w + e.clientX - x) / 16 * 9) + "px";
-        }
-        function closeResizeElement() {
-            window.removeEventListener("mouseup", closeResizeElement);
-            window.removeEventListener("mousemove", elementResize);
+            var container = document.getElementsByClassName("small-video-container")[0],
+                resize = document.getElementsByClassName("resize-bar")[0],
+                smallVideo = document.getElementsByClassName("small-video")[0],
+                x, w;
 
-            if (typeof func === "function") {
-                func();
+            resize.addEventListener("mousedown", resizeMouseDown);
+
+            function resizeMouseDown(e) {
+                e = e || window.event;
+                x = e.clientX;
+                w = smallVideo.offsetWidth;
+                window.addEventListener("mousemove", elementResize);
+                window.addEventListener("mouseup", closeResizeElement)
+            }
+
+            function elementResize(e) {
+                e = e || window.event;
+                smallVideo.style.width = (w + e.clientX - x) + "px";
+                container.style.width = smallVideo.style.width;
+                smallVideo.style.height = ((w + e.clientX - x) / 16 * 9) + "px";
+            }
+
+            function closeResizeElement() {
+                window.removeEventListener("mouseup", closeResizeElement);
+                window.removeEventListener("mousemove", elementResize);
+
+                if (typeof func === "function") {
+                    func();
+                }
             }
         }
     };
@@ -876,47 +923,23 @@
      * @param func - the callback function
      */
     DanmakuPlayer.prototype.closeSmallVideo = function (func) {
-        var close = document.getElementsByClassName("close")[0],
-            smallVideo = document.getElementsByClassName("small-video")[0];
-        close.addEventListener("click", function () {
-            if (smallVideo.style.visibility === "hidden") {
-                smallVideo.style.visibility = "visible";
-                close.innerHTML = "close";
+        if (this.i === this.n) {
 
-                if (typeof func === "function") {
-                    func();
+            var close = document.getElementsByClassName("close")[0],
+                smallVideo = document.getElementsByClassName("small-video")[0];
+            close.addEventListener("click", function () {
+                if (smallVideo.style.visibility === "hidden") {
+                    smallVideo.style.visibility = "visible";
+                    close.innerHTML = "close";
+
+                    if (typeof func === "function") {
+                        func();
+                    }
+                } else {
+                    smallVideo.style.visibility = "hidden";
+                    close.innerHTML = "open";
                 }
-            } else {
-                smallVideo.style.visibility = "hidden";
-                close.innerHTML = "open";
-            }
-        });
-    };
-
-    /**
-     * select which video to play in the small video
-     */
-    DanmakuPlayer.prototype.smallVideoSelector = function () {
-        if (!document.getElementsByClassName("selector")[0]) {
-            var selector = document.createElement("div");
-            selector.className = "selector";
-            document.body.appendChild(selector);
-        }
-        var btn = document.createElement("button");
-        selector = document.getElementsByClassName("selector")[0];
-        btn.innerHTML = this.i + 1;
-        selector.appendChild(btn);
-        btn.addEventListener("click", smallVideoPlay(this.i));
-
-        function smallVideoPlay(i) {
-            return function () {
-                var video = document.getElementsByClassName("video")[i];
-                var smallVideo = document.getElementsByClassName("small-video")[0];
-                console.log(video.innerHTML);
-                smallVideo.innerHTML = video.innerHTML;
-                smallVideo.currentTime = video.currentTime;
-                smallVideo.play();
-            }
+            });
         }
     };
 
@@ -924,22 +947,23 @@
         var players = [];
         for (var j = 0; j < i; j++) {
             try {
-                players[j] = new DanmakuPlayer(className, j, n);
+                players[j] = new DanmakuPlayer(className, j, n ? n : 0);
             }
             catch (e) {
-                console.error("some arguments haven't been specified")
+                console.error("some arguments haven't been specified");
             }
         }
         return players;
     };
 })(window);
 
-var array = window.GenerateDanmakuPlayers("test", 3, 1);
-array[0].initialize("video/[SumiSora][LittleBusters][SP][GB][720p].mp4");
-array[1].initialize("video/[SumiSora][LittleBusters_Refrain][01][GB][720p].mp4");
-array[2].initialize("video/[SumiSora][LittleBusters_Refrain][02][GB][720p].mp4");
+/*
+var array = window.GenerateDanmakuPlayers("CLASSNAME", 3);
+array[0].initialize("URL");
+array[1].initialize("URL");
+array[2].initialize("URL");
 
-/* or
+// OR YOU CAN ALSO DO LIKE THIS TO SET MORE STYLES
 var player = array[2];
 player.setDefaults({
     opacity: 0.5,
@@ -948,7 +972,7 @@ player.setDefaults({
     range: [0, 0.5],
     color: 'black'
 });
-player.createVideo("video/[SumiSora][LittleBusters_Refrain][02][GB][720p].mp4");
+player.createVideo("URL");
 player.createPlayingComponents();
 player.setPlaying();
 player.setVolume();
